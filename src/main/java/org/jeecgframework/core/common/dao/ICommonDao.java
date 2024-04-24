@@ -29,6 +29,7 @@ public interface ICommonDao extends IGenericBaseCommonDao{
 	 * 检查用户是否存在
 	 * */
 	public TSUser getUserByUserIdAndUserNameExits(TSUser user);
+	public TSUser findUserByAccountAndPassword(String username,String password);
 	public String getUserRole(TSUser user);
 	/**
 	 * 文件上传
@@ -65,6 +66,7 @@ public interface ICommonDao extends IGenericBaseCommonDao{
      * @return List<ComboTree>
      */
 	public  List<ComboTree> ComboTree(List all, ComboTreeModel comboTreeModel, List in, boolean recursive);
-	public  List<TreeGrid> treegrid(List all,TreeGridModel treeGridModel);
+
+	public  List<TreeGrid> treegrid(List<?> all,TreeGridModel treeGridModel);
 }
 

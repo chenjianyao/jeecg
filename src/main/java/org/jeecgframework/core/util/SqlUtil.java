@@ -75,7 +75,10 @@ public class SqlUtil {
      */
     public static String getCountSql(String sql, Map params) {
         String querySql = getFullSql(sql,params);
-        querySql = "SELECT COUNT(*) FROM ("+querySql+") t2";
+
+        //若要兼容数据库,SQL中取别名一律用大写
+        querySql = "SELECT COUNT(*) COUNT FROM ("+querySql+") t2";
+
         return querySql;
     }
 
@@ -120,12 +123,15 @@ public class SqlUtil {
      */
     @SuppressWarnings("rawtypes")
 	public static String jeecgCreatePageSql(String dbKey,String sql,Map params, int page, int rows){
+
+    	sql = getFullSql(sql,params);
+
         int beginNum = (page - 1) * rows;
         String[] sqlParam = new String[3];
         sqlParam[0] = sql;
         sqlParam[1] = beginNum+"";
         sqlParam[2] = rows+"";
-        DynamicDataSourceEntity dynamicSourceEntity = ResourceUtil.dynamicDataSourceMap.get(dbKey);
+        DynamicDataSourceEntity dynamicSourceEntity = ResourceUtil.getCacheDynamicDataSourceEntity(dbKey);
         String databaseType = dynamicSourceEntity.getDbType();
         if(DATABSE_TYPE_MYSQL.equalsIgnoreCase(databaseType)){
             sql = MessageFormat.format(MYSQL_SQL, sqlParam);

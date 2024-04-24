@@ -21,15 +21,21 @@ public class DataGridConfOptTag extends TagSupport {
 	private String exp;//判断链接是否显示的表达式
 	private String operationCode;//按钮的操作Code
 	private String urlStyle;//样式
+
 	private String urlclass;//自定义按钮样式
 	private String urlfont;//自定义按钮图标样式
+
+	private boolean inGroup;
+
 	public int doStartTag() throws JspTagException {
 		return EVAL_PAGE;
 	}
 	public int doEndTag() throws JspTagException {
 		Tag t = findAncestorWithClass(this, DataGridTag.class);
 		DataGridTag parent = (DataGridTag) t;
-		parent.setConfUrl(url,MutiLangUtil.getMutiLangInstance().getLang(title),MutiLangUtil.getMutiLangInstance().getLang(message),exp,operationCode,urlStyle,urlclass,urlfont);
+
+		parent.setConfUrl(url,MutiLangUtil.getLang(title),MutiLangUtil.getLang(message),exp,operationCode,urlStyle,urlclass,urlfont,inGroup);
+
 		return EVAL_PAGE;
 	}
 	public void setExp(String exp) {
@@ -53,6 +59,7 @@ public class DataGridConfOptTag extends TagSupport {
 	public String getUrlStyle() {
 		return urlStyle;
 	}
+
 	public String getUrlclass() {
 		return urlclass;
 	}
@@ -65,5 +72,12 @@ public class DataGridConfOptTag extends TagSupport {
 	public void setUrlfont(String urlfont) {
 		this.urlfont = urlfont;
 	}
-	
+
+	public boolean isInGroup() {
+		return inGroup;
+	}
+	public void setInGroup(boolean inGroup) {
+		this.inGroup = inGroup;
+	}
+
 }

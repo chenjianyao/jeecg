@@ -135,7 +135,16 @@ public class JdbcDao extends SimpleJdbcTemplate{
 		sql = jeecgCreatePageSql(sql,page,rows);
 		return this.jdbcTemplate.queryForList(sql);
 	}
-	
+
+	/**
+	 * 使用指定的检索标准检索数据并分页返回数据
+	 */
+	public List<Map<String, Object>> findForListMap(String sql, Map parameters, int page, int rows) {
+		//封装分页SQL
+		sql = jeecgCreatePageSql(sql,page,rows);
+		return super.findForListMap(sql, parameters);
+	}
+
 	
 	public List<Map<String, Object>> findForJdbc(String sql, Object... objs) {
 		return this.jdbcTemplate.queryForList(sql,objs);
@@ -193,14 +202,18 @@ public class JdbcDao extends SimpleJdbcTemplate{
 	 * 使用指定的检索标准检索数据并分页返回数据For JDBC
 	 */
 	public Long getCountForJdbc(String  sql) {
+
 		return  jdbcTemplate.queryForObject(sql,Long.class);
+
 	}
 	/**
 	 * 使用指定的检索标准检索数据并分页返回数据For JDBC-采用预处理方式
 	 * 
 	 */
 	public Long getCountForJdbcParam(String  sql,Object... objs) {
+
 		return  jdbcTemplate.queryForObject(sql, objs,Long.class);
+
 	}
 
 	public Integer executeSql2(String sql,List<Object> param) {
@@ -212,7 +225,9 @@ public class JdbcDao extends SimpleJdbcTemplate{
 	}
 
 	public Integer countByJdbc(String sql, Object... param) {
+
 		return this.jdbcTemplate.queryForObject(sql, param,Integer.class);
+
 	}
 
 	/**

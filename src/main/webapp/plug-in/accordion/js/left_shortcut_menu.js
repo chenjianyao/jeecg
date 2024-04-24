@@ -1,4 +1,4 @@
-﻿$(function() {
+﻿﻿﻿$(function() {
 	$("#nav").hide();
 	//easy ui树加载会在文档加载完执行,所以初始化菜单要延迟一秒 by jueyue
 
@@ -61,7 +61,6 @@ function InitLeftMenu() {
 	    navaa.find(".panel-body").css("height",winheight);
 	 });
 
-
 	// begin author：屈然博 2013-8-04 for：避免监听树自带三角点击事件
 	$('.easyui-tree').tree({
 		onClick: function(node){
@@ -105,14 +104,16 @@ function openThisNoed(node) {
 		$('.easyui-tree').tree('collapseAll');
 		$('.easyui-tree').tree('expand', node.target);
 	}
-	// begin author：屈然博 2013-7-12 for：叶子节点扩大点击范围
+
 	if (children = null || children.length == 0) {
 		var fun = $(node.target).find('a').attr("onclick");
-		var params = fun.substring(7, fun.length - 1).replaceAll("'", "")
-				.split(",");
-		addTab(params[0], params[1], params[2]);
+
+//		var params = fun.substring(7, fun.length - 1).replaceAll("'", "")
+//				.split(",");
+		eval(fun);
+
 	}
-	// end author：屈然博 2013-7-12 for：叶子节点扩大点击范围
+
 	
 }
 
@@ -139,11 +140,18 @@ function addTab(subtitle, url, icon) {
 	if(progress.length){return;}
 	// begin author：屈然博 2013-7-12 for：解决firefox 点击一次请求两次的问题
 	rowid="";
-	$.messager.progress({
-		text : loading,
-		interval : 200
-	});
+
+	//showloading();
+
+//	$.messager.progress({
+//		text : loading,
+//		interval : 200
+//	});
+
 	if (!$('#maintabs').tabs('exists', subtitle)) {
+
+		showloading();
+
 		//判断是否进行iframe方式打开tab，默认为href方式
 		if(url.indexOf('isHref') != -1){
 			$('#maintabs').tabs('add', {
@@ -155,7 +163,9 @@ function addTab(subtitle, url, icon) {
 		}else{
 			$('#maintabs').tabs('add', {
 				title : subtitle,
-				content : '<iframe src="' + url + '" frameborder="0" style="border:0;width:100%;height:99.4%;"></iframe>',
+
+				content : '<iframe onreadystatechange="hiddenloading();" onload="hiddenloading();" src="' + url + '" frameborder="0" style="border:0;width:100%;height:99.4%;"></iframe>',
+
 				closable : true,
 				icon : icon
 			});		
@@ -164,6 +174,9 @@ function addTab(subtitle, url, icon) {
 	} else {
 		$('#maintabs').tabs('select', subtitle);
 		$.messager.progress('close');
+
+		//hiddenloading();
+
 	}
 
 	// $('#maintabs').tabs('select',subtitle);
@@ -222,6 +235,9 @@ function tabClose() {
 	$(".tabs-inner").dblclick(function() {
 		var subtitle = $(this).children(".tabs-closable").text();
 		$('#tabs').tabs('close', subtitle);
+
+		hiddenloading();
+
 	})
 	/* 为选项卡绑定右键 */
 	$(".tabs-inner").bind('contextmenu', function(e) {
@@ -234,6 +250,9 @@ function tabClose() {
 
 		$('#mm').data("currtab", subtitle);
 		// $('#maintabs').tabs('select',subtitle);
+
+		hiddenloading();
+
 		return false;
 	});
 }
@@ -316,3 +335,11 @@ $.parser.onComplete = function() {/* 页面所有easyui组件渲染成功后，�
 		$.messager.progress('close');
 	}, 200);
 };
+
+function hiddenloading(){
+	$("#panelloadingDiv").hide();
+}
+
+function showloading(){
+	$("#panelloadingDiv").show();
+}

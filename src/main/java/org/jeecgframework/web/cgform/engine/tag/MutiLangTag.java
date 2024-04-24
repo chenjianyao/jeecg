@@ -1,23 +1,15 @@
 package org.jeecgframework.web.cgform.engine.tag;
 
+import freemarker.core.Environment;
+import freemarker.template.*;
+import org.jeecgframework.core.util.MutiLangUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
-
-import org.jeecgframework.core.util.ApplicationContextUtil;
-import org.jeecgframework.web.system.service.MutiLangServiceI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import freemarker.core.Environment;
-import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateScalarModel;
 
 /**
  * 自定义多语言标签
@@ -28,11 +20,7 @@ import freemarker.template.TemplateScalarModel;
 @Component("mutiLangTag")
 public class MutiLangTag implements TemplateDirectiveModel {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(MutiLangTag.class);
-
-	@Autowired
-	private static MutiLangServiceI mutiLangService;
+	private static final Logger LOG = LoggerFactory.getLogger(MutiLangTag.class);
 
 	public void execute(Environment env, Map params, TemplateModel[] loopVars,
 			TemplateDirectiveBody body) throws TemplateException, IOException {
@@ -45,13 +33,8 @@ public class MutiLangTag implements TemplateDirectiveModel {
 		}
 		
 		String langArg = getAttribute(params, "langArg");
-		
-		if (mutiLangService == null)
-		{
-			mutiLangService = ApplicationContextUtil.getContext().getBean(MutiLangServiceI.class);	
-		}
-		
-		String lang_context = mutiLangService.getLang(langKey, langArg);
+
+		String lang_context = MutiLangUtil.getLang(langKey, langArg);
 		
 		
 		Writer out = env.getOut();

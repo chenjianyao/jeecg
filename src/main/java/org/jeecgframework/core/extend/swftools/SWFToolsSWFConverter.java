@@ -20,6 +20,7 @@ public class SWFToolsSWFConverter implements SWFConverter {
        String p = System.getProperty("os.name");
        return p.toLowerCase().indexOf("windows") >= 0 ? true : false;
    }
+
 	public void convert2SWF(String inputFile, String swfFile, String extend) {
 		File pdfFile = new File(inputFile);
 		File outFile = new File(swfFile);
@@ -52,13 +53,14 @@ public class SWFToolsSWFConverter implements SWFConverter {
 	        	process = Runtime.getRuntime().exec(command);
 	        } else {
 	            //如果是linux系统,路径不能有空格，而且一定不能用双引号，否则无法创建进程
-	              String[] command = new String[3];
-	              command[0] = ConStant.getSWFToolsPath(extend);
-	              command[1] = inputFile;
+				  String[] command = new String[3];
+				command[0] = ConStant.getSWFToolsForLinux(extend);
+				command[1] = inputFile;
 	              command[2] = swfFile;
 	            //Runtime执行后返回创建的进程对象
 	              process = Runtime.getRuntime().exec(command);
 	        }
+
 			
 			
 			StreamGobbler errorGobbler = new StreamGobbler(
@@ -92,4 +94,5 @@ public class SWFToolsSWFConverter implements SWFConverter {
         String exePath = "D:/SWFTools/pdf2swf.exe";
         new SWFToolsSWFConverter().convert2SWF("C:/Users/chenj/Desktop/jeecg/陈劲任务.pdf", exePath);
    }
+
 }

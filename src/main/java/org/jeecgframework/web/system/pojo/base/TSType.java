@@ -28,11 +28,15 @@ public class TSType extends IdEntity implements java.io.Serializable {
 	private TSType TSType;//父类型
 	private String typename;//类型名称
 	private String typecode;//类型编码
+
 	private Date createDate;//创建时间
 	private String createName;//创建用户
+
 //	private List<TPProcess> TSProcesses = new ArrayList();
 	private List<TSType> TSTypes =new ArrayList();
 
+	private Integer orderNum;//序号
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "typegroupid")
 	public TSTypegroup getTSTypegroup() {
@@ -70,6 +74,7 @@ public class TSType extends IdEntity implements java.io.Serializable {
 	public void setTypecode(String typecode) {
 		this.typecode = typecode;
 	}
+
 	@Column(name="create_date")
 	public Date getCreateDate() {
 		return createDate;
@@ -87,6 +92,7 @@ public class TSType extends IdEntity implements java.io.Serializable {
 	public void setCreateName(String createName) {
 		this.createName = createName;
 	}
+
 	
 //	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "TSType")
 //	public List<TPProcess> getTSProcesses() {
@@ -96,9 +102,14 @@ public class TSType extends IdEntity implements java.io.Serializable {
 //	public void setTSProcesses(List<TPProcess> TSProcesses) {
 //		this.TSProcesses = TSProcesses;
 //	}
-
-
-
+	
+	@Column(name="order_num",length=3)
+	public Integer getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(Integer orderNum) {
+		this.orderNum = orderNum;
+	}
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "TSType")
 	public List<TSType> getTSTypes() {
 		return this.TSTypes;

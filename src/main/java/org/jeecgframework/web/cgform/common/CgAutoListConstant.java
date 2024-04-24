@@ -46,6 +46,8 @@ public class CgAutoListConstant {
 	public static final String FIELD_TITLE = "field_title";
 	/** 字段是否显示 */
 	public static final String FIELD_ISSHOW = "field_isShow";
+	/** 字段是否允许为空 */
+	public static final String FIELD_IS_NULL = "field_isNull";
 	/** 字段是否查询 */
 	public static final String FIELD_ISQUERY = "field_isQuery";
 	/** 字段查询模式 */
@@ -68,6 +70,10 @@ public class CgAutoListConstant {
 	public static final String FIELD_DICTTABLE = "field_dictTable";
 	/** 字典code */
 	public static final String FIELD_DICTFIELD = "field_dictField";
+
+	/** 字典Text */
+	public static final String FIELD_DICTTEXT = "field_dictText";
+
 	/** 字典数据 */
 	public static final String FIELD_DICTLIST = "field_dictlist";
 	
@@ -161,4 +167,12 @@ public class CgAutoListConstant {
 	/** online配置表单版本分隔符 */
 	public static final String ONLINE_TABLE_SPLIT_STR = "__";
 
+	public static final String BASEPATH = "basePath";
+	
+	
+	//===============Online开发权限{针对sql敏感操作}=================
+	/** 1： 有在线开发权限 */
+	public static final String SYS_DEV_FLAG_1 = "1";
+	/** 0： 无在线开发权限 */
+	public static final String SYS_DEV_FLAG_0 = "0";
 }

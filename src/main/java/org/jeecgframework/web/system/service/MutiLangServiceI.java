@@ -1,16 +1,12 @@
 package org.jeecgframework.web.system.service;
 
-import org.jeecgframework.core.common.service.CommonService;
 import org.jeecgframework.web.system.pojo.base.MutiLangEntity;
 
-public interface MutiLangServiceI extends CommonService{
+public interface MutiLangServiceI{
 
 	public void initAllMutiLang();
 	
-	public String getLang(String lang_key);
-	
-	public String getLang(String lang_key, String args);
-	
+
 	public void refleshMutiLangCach();
 	
 	/**

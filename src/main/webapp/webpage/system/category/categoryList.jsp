@@ -9,7 +9,7 @@
 			treegrid="true" pagination="false">
 			<t:dgCol title="common.type.name" field="name" treefield="text" width="300"></t:dgCol>
 			<t:dgCol title="common.icon" field="TSIcon_iconPath" treefield="code"
-				image="true"></t:dgCol>
+				image="true" hidden="true"></t:dgCol>
 			<t:dgCol title="common.type.code" field="code" treefield="id"></t:dgCol>
 			<t:dgCol title="common.operation" field="opt" width="100"></t:dgCol>
 			<t:dgDelOpt title="common.delete"
@@ -27,7 +27,9 @@
 		if (rowData) {
 			url += '&parent.code=' + rowData.id;
 		}
-		add(title, url, 'categoryList', 300, 340);
+
+		add(title, url, 'categoryList', 500, 340);
+
 	}
 	
 	function updateCategory(title, url, id) {
@@ -35,6 +37,8 @@
 		if (rowData) {
 			url += '&code=' + rowData.id;
 		}
-		update(title, url, 'categoryList', 300, 340);
+
+		update(title, url, 'categoryList', 500, 340);
+
 	}
 </script>

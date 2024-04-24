@@ -5,7 +5,6 @@
  <head>
   <title>图表配置</title>
   <t:base type="jquery,easyui,tools,DatePicker"></t:base>
-  <script type="text/javascript" src="plug-in/ckfinder/ckfinder.js"></script>
   <script type="text/javascript">
   $(document).ready(function(){
 	$('#tt').tabs({
@@ -45,7 +44,7 @@
 				<label class="Validform_label">描述:</label>
 			</td>
 			<td class="value">
-				<input id="content" name="content" type="text" style="width: 150px" class="inputxt"datatype="*">
+				<input id="content" name="content" type="text" style="width: 150px" class="inputxt" />
 				<span class="Validform_checktip"></span>
 				<label class="Validform_label" style="display: none;">描述</label>
 			</td>
@@ -53,7 +52,7 @@
 				<label class="Validform_label">y轴文字:</label>
 			</td>
 			<td class="value">
-				<input id="ytext" name="ytext" type="text" style="width: 150px" class="inputxt"datatype="*">
+				<input id="ytext" name="ytext" type="text" style="width: 150px" class="inputxt" datatype="*">
 				<span class="Validform_checktip"></span>
 				<label class="Validform_label" style="display: none;">y轴文字</label>
 			</td>
@@ -65,7 +64,7 @@
 				<label class="Validform_label">x轴数据:</label>
 			</td>
 			<td class="value">
-		     	 <input id="categories" name="categories" type="text" style="width: 150px" class="inputxt"datatype="*">
+		     	 <input id="categories" name="categories" type="text" style="width: 150px" class="inputxt" datatype="*">
 				<span class="Validform_checktip"></span>
 				<label class="Validform_label" style="display: none;">x轴数据</label>
 			</td>
@@ -102,7 +101,7 @@
 			</td>
 		</tr>
 	</table>
-			<div style="width: auto;height: 200px;">
+			<div style="width: auto;">
 				<%-- 增加一个div，用于调节页面大小，否则默认太小 --%>
 				<div style="width:800px;height:1px;"></div>
 				<t:tabs id="tt" iframe="false" tabPosition="top" fit="false">
@@ -118,23 +117,17 @@
 			 <td align="center"><input style="width:20px;" type="checkbox" name="ck"/></td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].fieldName" maxlength="36" 
-					  		type="text" class="inputxt"  style="width:120px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:120px;"/>
 					  <label class="Validform_label" style="display: none;">字段名</label>
 				  </td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].fieldTxt" maxlength="1000" 
-					  		type="text" class="inputxt"  style="width:120px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:120px;"/>
 					  <label class="Validform_label" style="display: none;">字段文本</label>
 				  </td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].orderNum" maxlength="10" 
-					  		type="text" class="inputxt"  style="width:40px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:40px;"/>
 					  <label class="Validform_label" style="display: none;">排序</label>
 				  </td>
 				  <td align="left">
@@ -159,9 +152,7 @@
 				  </td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].dictCode" maxlength="500" 
-					  		type="text" class="inputxt"  style="width:120px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:120px;"/>
 					  <label class="Validform_label" style="display: none;">字典Code</label>
 				  </td>
 				  <td align="left">
@@ -176,16 +167,12 @@
 				  </td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].graphName" maxlength="100" 
-					  		type="text" class="inputxt"  style="width:120px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:120px;"/>
 					  <label class="Validform_label" style="display: none;">图表名称</label>
 				  </td>
 				  <td align="left">
 					  	<input name="jformGraphreportItemList[#index#].tabName" maxlength="50" 
-					  		type="text" class="inputxt"  style="width:120px;"
-					               
-					               >
+					  		type="text" class="inputxt"  style="width:120px;"/>
 					  <label class="Validform_label" style="display: none;">标签名称</label>
 				  </td>
 			</tr>

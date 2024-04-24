@@ -40,6 +40,7 @@ import java.util.*;
  * @author  张代浩
  *
  */
+@SuppressWarnings("unchecked")
 @Repository
 public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGenericBaseCommonDao {
 
@@ -64,6 +65,24 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 			if(users != null && users.size() > 0){
 				return users.get(0);
 			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * 检查用户是否存在
+	 * */
+	public TSUser findUserByAccountAndPassword(String username,String inpassword) {
+		String password = PasswordUtil.encrypt(username, inpassword, PasswordUtil.getStaticSalt());
+		String query = "from TSUser u where u.userName = :username and u.password=:passowrd";
+		Query queryObject = getSession().createQuery(query);
+		queryObject.setParameter("username", username);
+		queryObject.setParameter("passowrd", password);
+		@SuppressWarnings("unchecked")
+		List<TSUser> users = queryObject.list();
+		if (users != null && users.size() > 0) {
+			return users.get(0);
 		}
 		return null;
 	}
@@ -181,7 +200,9 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 				}
 				if (uploadFile.getByteField() != null) {
 					// 二进制文件保存在数据库中
+
 //					reflectHelper.setMethodValue(uploadFile.getByteField(), StreamUtils.InputStreamTOByte(mf.getInputStream()));
+
 				}
 				File savefile = new File(savePath);
 				if (uploadFile.getRealPath() != null) {
@@ -190,6 +211,7 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 				}
 				saveOrUpdate(object);
 				// 文件拷贝到指定硬盘目录
+
 					if("txt".equals(extend)){
 						//利用utf-8字符集的固定首行隐藏编码原理
 						//Unicode:FF FE   UTF-8:EF BB   
@@ -208,11 +230,13 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 									out.close();
 								}
 							}  else {
+
 								//GBK
 								String contents = new String(mf.getBytes(),"GBK");
 								OutputStream out = new FileOutputStream(savePath);
 								out.write(contents.getBytes());
 								out.close();
+
 							}
 						  } catch(Exception e){
 							  String contents = new String(mf.getBytes(),"UTF-8");
@@ -225,6 +249,7 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 				} else {
 					FileCopyUtils.copy(mf.getBytes(), savefile);
 				}
+
 				
 //				if (uploadFile.getSwfpath() != null) {
 //					// 转SWF
@@ -232,11 +257,15 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 //					SwfToolsUtil.convert2SWF(savePath);
 //				}
 //				FileCopyUtils.copy(mf.getBytes(), savefile);
-				if (uploadFile.getSwfpath() != null) {
+
+				//默认上传文件是否转换为swf，实现在线预览功能开关
+				String globalSwfTransformFlag = ResourceUtil.getConfigByName("swf.transform.flag");
+				if ( "true".equals(globalSwfTransformFlag) && uploadFile.getSwfpath() != null) {
 					// 转SWF
 					reflectHelper.setMethodValue(uploadFile.getSwfpath(), path + FileUtils.getFilePrefix(myfilename) + ".swf");
 					SwfToolsUtil.convert2SWF(savePath);
 				}
+
 
 			}
 		} catch (Exception e1) {
@@ -271,20 +300,21 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 		String ctxPath = request.getSession().getServletContext().getRealPath("/");
 		String downLoadPath = "";
 		long fileLength = 0;
-		if (uploadFile.getRealPath() != null&&uploadFile.getContent() == null) {
-			downLoadPath = ctxPath + uploadFile.getRealPath();
-			fileLength = new File(downLoadPath).length();
-			try {
-				bis = new BufferedInputStream(new FileInputStream(downLoadPath));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		} else {
-			if (uploadFile.getContent() != null)
-				bis = new ByteArrayInputStream(uploadFile.getContent());
-			fileLength = uploadFile.getContent().length;
-		}
 		try {
+			if (uploadFile.getRealPath() != null&&uploadFile.getContent() == null) {
+				downLoadPath = ctxPath + uploadFile.getRealPath();
+				fileLength = new File(downLoadPath).length();
+				try {
+					bis = new BufferedInputStream(new FileInputStream(downLoadPath));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			} else {
+				if (uploadFile.getContent() != null)
+					bis = new ByteArrayInputStream(uploadFile.getContent());
+					fileLength = uploadFile.getContent().length;
+			}
+		
 			if (!uploadFile.isView() && uploadFile.getExtend() != null) {
 				if (uploadFile.getExtend().equals("text")) {
 					response.setContentType("text/plain;");
@@ -489,7 +519,9 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
 		for (Object obj : all) {
 			trees.add(comboTree(obj, comboTreeModel, in, recursive));
 		}
+
 		all.clear();
+
 		return trees;
 
 	}
@@ -541,16 +573,17 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
                 tree.setChildren(children);
             }
         }
-		
+
 		if(curChildList!=null){
 			curChildList.clear();
 		}
+
 		return tree;
 	}
 	/**
 	 * 构建树形数据表
 	 */
-	public List<TreeGrid> treegrid(List all, TreeGridModel treeGridModel) {
+	public List<TreeGrid> treegrid(List<?> all, TreeGridModel treeGridModel) {
 		List<TreeGrid> treegrid = new ArrayList<TreeGrid>();
 		for (Object obj : all) {
 			ReflectHelper reflectHelper = new ReflectHelper(obj);
@@ -643,11 +676,12 @@ public class CommonDao extends GenericBaseCommonDao implements ICommonDao, IGene
             	String functionType = oConvertUtils.getString(reflectHelper.getMethodValue(treeGridModel.getFunctionType()));
             	tg.setFunctionType(functionType);
             }
-            
+
             if(treeGridModel.getIconStyle() != null){
             	String iconStyle = oConvertUtils.getString(reflectHelper.getMethodValue(treeGridModel.getIconStyle()));
             	tg.setIconStyle(iconStyle);
             }
+
 			treegrid.add(tg);
 		}
 		return treegrid;

@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,8 +54,10 @@ import org.jeecgframework.web.system.pojo.base.TSRoleFunction;
 import org.jeecgframework.web.system.pojo.base.TSRoleOrg;
 import org.jeecgframework.web.system.pojo.base.TSRoleUser;
 import org.jeecgframework.web.system.pojo.base.TSUser;
+import org.jeecgframework.web.system.service.CacheServiceI;
 import org.jeecgframework.web.system.service.SystemService;
 import org.jeecgframework.web.system.service.UserService;
+import org.jeecgframework.web.system.util.OrgConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -65,6 +68,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * 角色处理类
@@ -82,6 +87,8 @@ public class RoleController extends BaseController {
 	private static final Logger logger = Logger.getLogger(RoleController.class);
 	private UserService userService;
 	private SystemService systemService;
+	@Autowired
+	private CacheServiceI cacheService;
 
 
 	@Autowired
@@ -120,14 +127,16 @@ public class RoleController extends BaseController {
 	public void roleGrid(TSRole role, HttpServletRequest request,
 			HttpServletResponse response, DataGrid dataGrid) {
 		CriteriaQuery cq = new CriteriaQuery(TSRole.class, dataGrid);
-		org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq,
-				role);
+		org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq,role);
+
+		cq.eq("roleType", OrgConstants.SYSTEM_ROLE_TYPE);//默认只查询系统角色
+
 		cq.add();
 		this.systemService.getDataGridReturn(cq, true);
 		TagUtil.datagrid(response, dataGrid);
 		;
 	}
-	
+
 	@RequestMapping(params = "delUserRole")
 	@ResponseBody
 	public AjaxJson delUserRole(@RequestParam(required=true)String userid,@RequestParam(required=true)String roleid) {
@@ -149,7 +158,25 @@ public class RoleController extends BaseController {
 		}
 		return ajaxJson;
 	}
+
 	
+	/**
+	 * 清空登录用户权限缓存
+	 */
+	@RequestMapping(params = "refresh")
+	@ResponseBody
+	public AjaxJson refresh(HttpServletRequest request,HttpServletResponse response) {
+		AjaxJson ajaxJson = new AjaxJson();
+		try {
+			cacheService.clean("sysAuthCache");
+			logger.info("-----清空登录用户权限缓存成功--------[sysAuthCache]-----");
+			ajaxJson.setMsg("重置用户权限成功");
+		} catch (Exception e) {
+			ajaxJson.setMsg("重置用户权限失败");
+			e.printStackTrace();
+		}
+		return ajaxJson;
+	}
 
 	/**
 	 * 删除角色
@@ -168,6 +195,7 @@ public class RoleController extends BaseController {
 			delRoleFunction(role);
 
             systemService.executeSql("delete from t_s_role_org where role_id=?", role.getId()); // 删除 角色-机构 关系信息
+
             role = systemService.getEntity(TSRole.class, role.getId());
 			userService.delete(role);
 			message = "角色: " + role.getRoleName() + "被删除成功";
@@ -177,6 +205,7 @@ public class RoleController extends BaseController {
 			message = "角色: 仍被用户使用，请先删除关联关系";
 		}
 		j.setMsg(message);
+		logger.info(message);
 		return j;
 	}
 
@@ -236,16 +265,21 @@ public class RoleController extends BaseController {
 		AjaxJson j = new AjaxJson();
 		if (StringUtil.isNotEmpty(role.getId())) {
 			message = "角色: " + role.getRoleName() + "被更新成功";
+
+			role.setRoleType(OrgConstants.SYSTEM_ROLE_TYPE);
+
 			userService.saveOrUpdate(role);
-			systemService.addLog(message, Globals.Log_Type_UPDATE,
-					Globals.Log_Leavel_INFO);
+			systemService.addLog(message, Globals.Log_Type_UPDATE,Globals.Log_Leavel_INFO);
 		} else {
 			message = "角色: " + role.getRoleName() + "被添加成功";
+
+			role.setRoleType(OrgConstants.SYSTEM_ROLE_TYPE);//默认系统角色
+
 			userService.save(role);
 			systemService.addLog(message, Globals.Log_Type_INSERT,
 					Globals.Log_Leavel_INFO);
 		}
-
+		logger.info(message);
 		return j;
 	}
 
@@ -271,6 +305,7 @@ public class RoleController extends BaseController {
 	public ModelAndView userList(HttpServletRequest request) {
 
 		request.setAttribute("roleId", request.getParameter("roleId"));
+
 		return new ModelAndView("system/role/roleUserList");
 	}
 	
@@ -296,6 +331,7 @@ public class RoleController extends BaseController {
         cq.add(Property.forName("id").in(subCq.getDetachedCriteria()));
         cq.add();
         */
+
 		Criterion cc = null;
 		if (roleUser.size() > 0) {
 			for(int i = 0; i < roleUser.size(); i++){
@@ -309,6 +345,8 @@ public class RoleController extends BaseController {
 			cc =Restrictions.eq("id", "-1");
 		}
 		cq.add(cc);
+        cq.eq("deleteFlag", Globals.Delete_Normal);
+		cq.add();
 		org.jeecgframework.core.extend.hqlsearch.HqlGenerateUtil.installHql(cq, user);
 		this.systemService.getDataGridReturn(cq, true);
 		TagUtil.datagrid(response, dataGrid);
@@ -423,6 +461,7 @@ public class RoleController extends BaseController {
 		return j;
 	}
 
+
 	/**
 	 * 设置权限
 	 * 
@@ -463,13 +502,101 @@ public class RoleController extends BaseController {
 		}
 		ComboTreeModel comboTreeModel = new ComboTreeModel("id","functionName", "TSFunctions");
 
-		comboTrees = systemService.ComboTree(functionList, comboTreeModel,loginActionlist, true);
+		comboTrees = comboTree(functionList, comboTreeModel,loginActionlist, true);
 		MutiLangUtil.setMutiComboTree(comboTrees);
 
-		
+
 		functionList.clear();
+		functionList = null;
 		loginActionlist.clear();
+		loginActionlist = null;
+
+		//System.out.println(JSON.toJSONString(comboTrees,true));		
 		return comboTrees;
+	}
+
+	private List<ComboTree> comboTree(List<TSFunction> all, ComboTreeModel comboTreeModel, List<TSFunction> in, boolean recursive) {
+		List<ComboTree> trees = new ArrayList<ComboTree>();
+		for (TSFunction obj : all) {
+			trees.add(comboTree(obj, comboTreeModel, in, recursive));
+		}
+		all.clear();
+		return trees;
+
+	}
+	
+	/**
+     * 构建ComboTree
+     * @param obj
+     * @param comboTreeModel ComboTreeModel comboTreeModel = new ComboTreeModel("id","functionName", "TSFunctions");
+     * @param in
+     * @param recursive 是否递归子节点
+     * @return
+     */
+	@SuppressWarnings("unchecked")
+	private ComboTree comboTree(TSFunction obj, ComboTreeModel comboTreeModel, List<TSFunction> in, boolean recursive) {
+		ComboTree tree = new ComboTree();
+		String id = oConvertUtils.getString(obj.getId());
+		tree.setId(id);
+		tree.setText(oConvertUtils.getString(obj.getFunctionName()));
+		
+		
+		
+		if (in == null) {
+		} else {
+			if (in.size() > 0) {
+				for (TSFunction inobj : in) {
+					String inId = oConvertUtils.getString(inobj.getId());
+                    if (inId.equals(id)) {
+						tree.setChecked(true);
+					}
+				}
+			}
+		}
+
+		List<TSFunction> curChildList = obj.getTSFunctions();
+
+		Collections.sort(curChildList, new Comparator<Object>(){
+			@Override
+	        public int compare(Object o1, Object o2) {
+	        	TSFunction tsFunction1=(TSFunction)o1;  
+	        	TSFunction tsFunction2=(TSFunction)o2;  
+	        	int flag=tsFunction1.getFunctionOrder().compareTo(tsFunction2.getFunctionOrder());
+	        	  if(flag==0){
+	        	   return tsFunction1.getFunctionName().compareTo(tsFunction2.getFunctionName());
+	        	  }else{
+	        	   return flag;
+	        	  }  
+	        }             
+	    });
+
+		if (curChildList != null && curChildList.size() > 0) {
+			tree.setState("closed");
+			//tree.setChecked(false);
+
+            if (recursive) { // 递归查询子节点
+                List<ComboTree> children = new ArrayList<ComboTree>();
+                for (TSFunction childObj : curChildList) {
+                    ComboTree t = comboTree(childObj, comboTreeModel, in, recursive);
+                    children.add(t);
+                }
+                tree.setChildren(children);
+            }
+        }
+
+		if(obj.getFunctionType() == 1){
+			if(curChildList != null && curChildList.size() > 0){
+				tree.setIconCls("icon-user-set-o");
+			}else{
+				tree.setIconCls("icon-user-set");
+			}
+		}
+
+		if(curChildList!=null){
+			curChildList.clear();
+		}
+
+		return tree;
 	}
 
 	/**
@@ -493,11 +620,15 @@ public class RoleController extends BaseController {
 			for (TSRoleFunction functionOfRole : roleFunctionList) {
 				map.put(functionOfRole.getTSFunction().getId(), functionOfRole);
 			}
-			String[] roleFunctions = rolefunction.split(",");
+
 			Set<String> set = new HashSet<String>();
-			for (String s : roleFunctions) {
-				set.add(s);
+			if(StringUtil.isNotEmpty(rolefunction)){
+				String[] roleFunctions = rolefunction.split(",");
+				for (String s : roleFunctions) {
+					set.add(s);
+				}
 			}
+
 			updateCompare(set, role, map);
 			j.setMsg("权限更新成功");
 		} catch (Exception e) {
@@ -696,8 +827,7 @@ public class RoleController extends BaseController {
 		cq.add();
 		List<TSOperation> operationList = this.systemService
 				.getListByCriteriaQuery(cq, false);
-		Set<String> operationCodes = systemService
-				.getOperationCodesByRoleIdAndFunctionId(roleId, functionId);
+		Set<String> operationCodes = systemService.getOperationCodesByRoleIdAndFunctionId(roleId, functionId);
 		request.setAttribute("operationList", operationList);
 		request.setAttribute("operationcodes", operationCodes);
 		request.setAttribute("functionId", functionId);
@@ -716,6 +846,7 @@ public class RoleController extends BaseController {
 		AjaxJson j = new AjaxJson();
 		String roleId = request.getParameter("roleId");
 		String functionId = request.getParameter("functionId");
+
 		String operationcodes = null;
 		try {
 			operationcodes = URLDecoder.decode(
@@ -723,6 +854,7 @@ public class RoleController extends BaseController {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+
 		CriteriaQuery cq1 = new CriteriaQuery(TSRoleFunction.class);
 		cq1.eq("TSRole.id", roleId);
 		cq1.eq("TSFunction.id", functionId);
@@ -756,8 +888,7 @@ public class RoleController extends BaseController {
 		cq.add();
 		List<TSDataRule> dataRuleList = this.systemService
 				.getListByCriteriaQuery(cq, false);
-		Set<String> dataRulecodes = systemService
-				.getOperationCodesByRoleIdAndruleDataId(roleId, functionId);
+		Set<String> dataRulecodes = systemService.getDataRuleIdsByRoleIdAndFunctionId(roleId, functionId);
 		request.setAttribute("dataRuleList", dataRuleList);
 		request.setAttribute("dataRulecodes", dataRulecodes);
 		request.setAttribute("functionId", functionId);
@@ -777,6 +908,7 @@ public class RoleController extends BaseController {
 		AjaxJson j = new AjaxJson();
 		String roleId = request.getParameter("roleId");
 		String functionId = request.getParameter("functionId");
+
 		String dataRulecodes = null;
 		try {
 			dataRulecodes = URLDecoder.decode(
@@ -784,6 +916,7 @@ public class RoleController extends BaseController {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+
 		CriteriaQuery cq1 = new CriteriaQuery(TSRoleFunction.class);
 		cq1.eq("TSRole.id", roleId);
 		cq1.eq("TSFunction.id", functionId);
@@ -829,8 +962,11 @@ public class RoleController extends BaseController {
         subCq.eq("TSRole.id", roleId);
         subCq.add();
         
-
         cq.add(Property.forName("id").notIn(subCq.getDetachedCriteria()));
+
+        cq.eq("deleteFlag", Globals.Delete_Normal);//删除状态，不删除
+        cq.eq("userType",Globals.USER_TYPE_SYSTEM);//系统用户
+
         cq.add();
 
         this.systemService.getDataGridReturn(cq, true);
@@ -905,7 +1041,7 @@ public class RoleController extends BaseController {
 		List<TSRole> tsRoles = systemService.getListByCriteriaQuery(cq,false);
 		modelMap.put(NormalExcelConstants.FILE_NAME,"角色表");
 		modelMap.put(NormalExcelConstants.CLASS,TSRole.class);
-		modelMap.put(NormalExcelConstants.PARAMS,new ExportParams("角色表列表", "导出人:"+ResourceUtil.getSessionUserName().getRealName(),
+		modelMap.put(NormalExcelConstants.PARAMS,new ExportParams("角色表列表", "导出人:"+ResourceUtil.getSessionUser().getRealName(),
 				"导出信息"));
 		modelMap.put(NormalExcelConstants.DATA_LIST,tsRoles);
 		return NormalExcelConstants.JEECG_EXCEL_VIEW;
@@ -922,7 +1058,7 @@ public class RoleController extends BaseController {
 			, DataGrid dataGrid,ModelMap modelMap) {
 		modelMap.put(NormalExcelConstants.FILE_NAME,"用户表");
 		modelMap.put(NormalExcelConstants.CLASS,TSRole.class);
-		modelMap.put(NormalExcelConstants.PARAMS,new ExportParams("用户表列表", "导出人:"+ResourceUtil.getSessionUserName().getRealName(),
+		modelMap.put(NormalExcelConstants.PARAMS,new ExportParams("用户表列表", "导出人:"+ResourceUtil.getSessionUser().getRealName(),
 				"导出信息"));
 		modelMap.put(NormalExcelConstants.DATA_LIST,new ArrayList());
 		return NormalExcelConstants.JEECG_EXCEL_VIEW;

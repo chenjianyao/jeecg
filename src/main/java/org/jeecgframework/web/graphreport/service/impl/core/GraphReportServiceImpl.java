@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.jeecgframework.core.common.dao.jdbc.JdbcDao;
 import org.jeecgframework.core.common.exception.BusinessException;
 import org.jeecgframework.core.common.service.impl.CommonServiceImpl;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class GraphReportServiceImpl extends CommonServiceImpl implements
 		GraphReportServiceI {
+	private Logger log = Logger.getLogger(GraphReportServiceImpl.class);
 	@Autowired
 	private JdbcDao jdbcDao;
 
@@ -63,16 +65,22 @@ public class GraphReportServiceImpl extends CommonServiceImpl implements
 
 	
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> queryByCgReportSql(String sql, Map params,
+	public List<Map<String, Object>> queryByCgReportSql(String sql, Map params,Map<String,Object> paramData,
 			int page, int rows) {
 		sql = handleElInSQL(sql, params);
 		String querySql = getFullSql(sql,params);
+		log.debug("-------------动态报表功能--------querySql--" + querySql);
 		List<Map<String,Object>> result = null;
-		if(page==-1 && rows==-1){
-			result = jdbcDao.findForJdbc(querySql);
-		}else{
-			result = jdbcDao.findForJdbc(querySql, page, rows);
+
+		if(paramData!=null&&paramData.size()==0){
+			paramData = null;
 		}
+		if(page==-1 && rows==-1){
+			result = jdbcDao.findForListMap(querySql,paramData);
+		}else{
+			result = jdbcDao.findForListMap(querySql, paramData, page, rows);
+		}
+
 		return result;
 	}
 	
@@ -164,6 +172,7 @@ public class GraphReportServiceImpl extends CommonServiceImpl implements
 		if(oConvertUtils.isEmpty(sql)){
 			return null;
 		}
+		log.info("-------------动态报表字段--------getSqlFields--" + sql);
 		List<Map<String, Object>> result = jdbcDao.findForJdbc(sql, 1, 1);
 		if(result.size()<1){
 			throw new BusinessException("该报表sql没有数据");

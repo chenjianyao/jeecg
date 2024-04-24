@@ -1,12 +1,10 @@
 package org.jeecgframework.tag.core.easyui;
 
+import org.jeecgframework.core.util.MutiLangUtil;
+
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.jeecgframework.core.util.ApplicationContextUtil;
-import org.jeecgframework.web.system.service.MutiLangServiceI;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
@@ -29,9 +27,6 @@ public class TabTag extends TagSupport {
 	private boolean closable=false;//是否带关闭按钮
 	private String langArg;
 	
-	@Autowired
-	private static MutiLangServiceI mutiLangService;
-	
 	public int doStartTag() throws JspTagException {
 		return EVAL_PAGE;
 	}
@@ -48,13 +43,7 @@ public class TabTag extends TagSupport {
 		this.id = id;
 	}
 	public void setTitle(String title) {
-		//add by Rocky, 处理多语言
-		if(mutiLangService == null)
-		{
-			mutiLangService = ApplicationContextUtil.getContext().getBean(MutiLangServiceI.class);	
-		}
-		
-		String lang_context = mutiLangService.getLang(title, langArg);
+		String lang_context = MutiLangUtil.getLang(title, langArg);
 		
 		this.title = lang_context;
 	}

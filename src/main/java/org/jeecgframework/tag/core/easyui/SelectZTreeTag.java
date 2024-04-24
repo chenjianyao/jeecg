@@ -24,6 +24,12 @@ public class SelectZTreeTag extends TagSupport {
 	private String url;
 	private String windowWidth; //窗口宽度
 	private String windowHeight; //窗口高度
+
+	private boolean selectCascadeParent = false;	//勾选时选择父节点
+	private boolean selectCascadeChildren = false;	//勾选时选择子节点
+	private boolean cancelCascadeParent = false;	//取消勾选时选择父节点
+	private boolean cancelCascadeChildren = false;	//取消勾选时选择子节点
+
 	public String getUrl() {
 		return url;
 	}
@@ -55,7 +61,39 @@ public class SelectZTreeTag extends TagSupport {
 	public void setWindowHeight(String windowHeight) {
 		this.windowHeight = windowHeight;
 	}
-	
+
+	public boolean getSelectCascadeParent() {
+		return selectCascadeParent;
+	}
+
+	public void setSelectCascadeParent(boolean selectCascadeParent) {
+		this.selectCascadeParent = selectCascadeParent;
+	}
+
+	public boolean getSelectCascadeChildren() {
+		return selectCascadeChildren;
+	}
+
+	public void setSelectCascadeChildren(boolean selectCascadeChildren) {
+		this.selectCascadeChildren = selectCascadeChildren;
+	}
+
+	public boolean getCancelCascadeParent() {
+		return cancelCascadeParent;
+	}
+
+	public void setCancelCascadeParent(boolean cancelCascadeParent) {
+		this.cancelCascadeParent = cancelCascadeParent;
+	}
+
+	public boolean getCancelCascadeChildren() {
+		return cancelCascadeChildren;
+	}
+
+	public void setCancelCascadeChildren(boolean cancelCascadeChildren) {
+		this.cancelCascadeChildren = cancelCascadeChildren;
+	}
+
 	public int doStartTag() throws JspTagException {
 		return EVAL_PAGE;
 	}
@@ -95,9 +133,10 @@ public class SelectZTreeTag extends TagSupport {
 		if(StringUtils.isBlank(windowHeight)){
 			windowHeight = "30px";
 		}
-		sb.append("<link rel=\"stylesheet\" href=\"plug-in/ztree/css/zTreeStyle.css\" type=\"text/css\"></link>");
+		sb.append("<link rel=\"stylesheet\" href=\"plug-in/ztree/css/metroStyle.css\" type=\"text/css\"></link>");
 		sb.append("<script type=\"text/javascript\" src=\"plug-in/ztree/js/jquery.ztree.core-3.5.min.js\"></script>");
 		sb.append("<script type=\"text/javascript\" src=\"plug-in/ztree/js/jquery.ztree.excheck-3.5.min.js\"></script>");
+
 		sb.append("<script type=\"text/javascript\">"
 		+"function beforeClick(treeId, treeNode) {"
 		+ "   var zTree = $.fn.zTree.getZTreeObj('treeDemo');"
@@ -112,12 +151,12 @@ public class SelectZTreeTag extends TagSupport {
 		+ "			v += nodes[i].name + ',';"
 		+ "		}"
 		+ "		if (v.length > 0 ) v = v.substring(0, v.length-1);"
-		+ "		var cityObj = $("+id+");"
+		+ "		var cityObj = $('#"+id+"');"
 		+ "		cityObj.attr('value', v);"
 		+ "} "
 		+ " function showMenu() {"
-		+ "		var cityObj = $("+id+");"
-		+ "		var cityOffset = $("+id+").offset();"
+		+ "		var cityObj = $('#"+id+"');"
+		+ "		var cityOffset = $('#"+id+"').offset();"
 		+ " $('#menuContent').css({left:cityOffset.left + 'px', top:cityOffset.top + cityObj.outerHeight() + 'px'}).slideDown('fast');"		
 		+ "    $('body').bind('mousedown', onBodyDown);"
 		+ "} "
@@ -135,9 +174,25 @@ public class SelectZTreeTag extends TagSupport {
 		+ "		enable: true,"
 		+ "}, "
 		+ "		check: {"
-		+ "			enable: true,"
-		+ "			chkboxType: {'Y':'', 'N':''}"
-		+ "		},"
+		+ "			enable: true,");
+
+		sb.append("chkboxType: {'Y':'");
+		if(selectCascadeParent) {
+			sb.append("p");
+		}
+		if(selectCascadeChildren) {
+			sb.append("s");
+		}
+		sb.append("','N':'");
+		if(cancelCascadeParent) {
+			sb.append("p");
+		} 
+		if(cancelCascadeChildren) {
+			sb.append("s");
+		}
+		sb.append("'}");
+
+		sb.append("},"
 		+ "		view: {"
 		+ "			dblClickExpand: false"
 		+ "		},"
@@ -164,7 +219,8 @@ public class SelectZTreeTag extends TagSupport {
 		+ "		);"
 		+ "});"
 		+ "</script>");
-		sb.append("		   <input id=\""+id+"\" type=\"text\" readonly value=\"\" style=\"width:"+windowWidth+";height:"+windowHeight+"\" class=\"form-control\" onclick=\"showMenu();\" />");
+
+		sb.append("		   <input id=\""+id+"\" name=\""+id+"\"  type=\"text\" readonly value=\"\" style=\"width:"+windowWidth+";height:"+windowHeight+"\" class=\"form-control\" onclick=\"showMenu();\" />");
 		sb.append("<div id=\"menuContent\" class=\"menuContent\" style=\"display:none; position: absolute;\" >");
 		sb.append("		<ul id=\"treeDemo\" class=\"ztree\" style=\"margin-top:0; width:100%;background-color:#f9f9f9\"></ul>");
 		sb.append("</div>");

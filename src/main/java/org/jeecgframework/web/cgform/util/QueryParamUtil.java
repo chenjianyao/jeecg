@@ -42,20 +42,14 @@ public class QueryParamUtil {
 		
 		if("single".equals(b.getQueryMode())){
 			//单条件组装方式
+
 			String value = request.getParameter(b.getFieldName());
-			try {
-				if(StringUtil.isEmpty(value)){
+
+				if(StringUtil.isEmpty(value)||"请输入关键字".equals(value)){
+
 					return;
 				}
-				String uri = request.getQueryString();
-				if(uri.contains(b.getFieldName()+"=")){
-					String contiansChinesevalue = new String(value.getBytes("ISO-8859-1"), "UTF-8");
-					value = contiansChinesevalue;
-				}
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				return;
-			} 
+
 			sql_inj_throw(value);
 			value = applyType(b.getType(),value);
 			if(!StringUtil.isEmpty(value)){
@@ -97,9 +91,11 @@ public class QueryParamUtil {
 		if(!StringUtil.isEmpty(value)){
 			String result = "";
 			if(CgAutoListConstant.TYPE_STRING.equalsIgnoreCase(fieldType)){
+
 				//if(ResourceUtil.fuzzySearch&&(!value.contains("*"))){
 				//	value="*"+value+"*";
 				//}
+
 				result = "'" +value+ "'";
 			}else if(CgAutoListConstant.TYPE_DATE.equalsIgnoreCase(fieldType)){
 				result = getDateFunction(value, "yyyy-MM-dd");
@@ -168,7 +164,11 @@ public class QueryParamUtil {
 			dateFunction = "TO_DATE('"+dateStr+"','"+dateFormat+"')";
 		}else if("sqlserver".equalsIgnoreCase(dbType)){
 			//sqlserver日期函数
-			dateFunction = "(CONVERT(VARCHAR,'"+dateStr+"') as DATETIME)";
+
+			//dateFunction = "(CONVERT(VARCHAR,'"+dateStr+"') as DATETIME)";
+			dateFunction = "CONVERT(VARCHAR,'"+dateStr+"',120)";
+			//120 或者 20	yyyy-mm-dd hh:mi:ss(24h)
+
 		}else if("postgres".equalsIgnoreCase(dbType)){
 			//postgres日期函数
 			dateFunction = "'"+dateStr+"'::date ";

@@ -3,7 +3,7 @@
 <t:base type="jquery,easyui,tools,DatePicker"></t:base>
 <div id="main_depart_list" class="easyui-layout" fit="true">
   <div region="center" style="padding:1px;">
-  <t:datagrid name="tSNoticeList" checkbox="true" fitColumns="false" title="common.notice" actionUrl="noticeController.do?datagrid2" idField="id" fit="true" queryMode="group">
+  <t:datagrid name="tSNoticeList" checkbox="true" fitColumns="true" title="common.notice" actionUrl="noticeController.do?datagrid2" idField="id" fit="true" queryMode="group">
    <t:dgCol title="ID"  field="id"  hidden="true"  queryMode="group"  width="120"></t:dgCol>
    <t:dgCol title="通知标题"  field="noticeTitle"  hidden="false"  queryMode="group"  width="320"></t:dgCol>
    <%-- <t:dgCol title="通知公告内容"  field="noticeContent"  hidden="true"  queryMode="group"  width="120"></t:dgCol> --%>
@@ -15,8 +15,8 @@
    <t:dgToolBar title="common.add" icon="icon-add" url="noticeController.do?goAdd" funname="add" width="800" height="600"></t:dgToolBar>
    <t:dgToolBar title="common.edit" icon="icon-edit" url="noticeController.do?goUpdate" funname="update" width="800" height="600"></t:dgToolBar>
    <t:dgToolBar title="common.batchDelete"  icon="icon-remove" url="noticeController.do?doBatchDel" funname="deleteALLSelect"></t:dgToolBar>
-   <t:dgFunOpt exp="noticeLevel#eq#2" funname="queryRoles(id)" title="common.authority" urlclass="ace_button"  urlfont="fa-toggle-on"></t:dgFunOpt>
-   <t:dgFunOpt exp="noticeLevel#eq#3" funname="queryUsers(id)" title="common.authority" urlclass="ace_button"  urlfont="fa-toggle-on"></t:dgFunOpt>
+  <%-- <t:dgFunOpt exp="noticeLevel#eq#2" funname="queryRoles(id)" title="common.authority" urlclass="ace_button"  urlfont="fa-toggle-on"></t:dgFunOpt>
+   <t:dgFunOpt exp="noticeLevel#eq#3" funname="queryUsers(id)" title="common.authority" urlclass="ace_button"  urlfont="fa-toggle-on"></t:dgFunOpt>--%>
   </t:datagrid>
   </div>
  </div>

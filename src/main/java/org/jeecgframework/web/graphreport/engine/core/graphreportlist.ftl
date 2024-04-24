@@ -1,11 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <!-- context path -->
 ${config_iframe}
 </head>
 <body>
-<div class="operations" style="text-align: right;"> 
+<div class="operations" style="text-align: right;border-top:1px solid #e7eaec;"> 
 	<div class="bd3">
 		<#list config_queryList as x>
 			<span style="display:-moz-inline-box;display:inline-block;">
@@ -42,8 +42,8 @@ ${config_iframe}
 				            });
 				        </script>
 					<#else>
-						<select name = "${x['field_name']}" WIDTH="100" style="width: 104px" <#if  (x['field_dictlist']?size >10)>class="easyui-combobox"</#if>>
-						<#if  (x['field_dictlist']?size <= 10)><option value = "">---请选择---</option></#if>
+						<select name = "${x['field_name']}" style="width: 104px" <#if  (x['field_dictlist']?size >10)></#if>>
+						<#if  (x['field_dictlist']?size <= 10)><option value = ""></option></#if>
 						<#if  (x['field_dictlist']?size > 10)><option value = ""></option></#if>
 						<#list x['field_dictlist']  as xd>
 							<option value = "${xd['typecode']}">${xd['typename']}</option>
@@ -58,9 +58,9 @@ ${config_iframe}
 			</span>	
 		</#list> 
 		<#if (config_queryList?size > 0)>
-			<span style="display:-moz-inline-box;display:inline-block;margin-top: 5px;margin-left: 10px;">
-				<a href="#" class="easyui-linkbutton" iconCls="icon-search" id="searchBtn">查询</a>
-				<a href="#" class="easyui-linkbutton" iconCls="icon-reload" id="resetBtn">重置</a>
+			<span style="display:-moz-inline-box;display:inline-block;margin-left: 20px;">
+				<a href="#"  id="searchBtn"><img style="top: 3px;position: relative;" src="plug-in/graphreport/css/images/search.png"> 查询</a> &nbsp;
+				<a href="#"  id="resetBtn"><img style="top: 3px;position: relative;" src="plug-in/graphreport/css/images/reset.png"> 重置</a>
 			</span>
 		</#if>	 
 	</div>
@@ -93,7 +93,7 @@ ${config_iframe}
 		<h2>数据明细</h2>
 		<div class="option">
 			<a href="###" id="exportExcel">
-				<span class="icon export exportCsv" title="导出"></span>
+				<span class="icon" title="导出"></span>
 			</a>
 		</div>
 	</div>
@@ -204,26 +204,49 @@ function showReport(data, tabName) {
 	</#if>
 	//数据转换成报表格式
 	var series = new Array();
-	
+	<#-- update-begin-author:taoyan date:20181109 for：online图表配置 饼图无文字提示 全部显示slice  -->
+	<#assign pietooltip="1">
 	<#list graphList as x>
 		<#if (tabList?size > 1)>
 			if(tabName || $.trim(tabName)) {
 				if("${x['tab_name']!''}" == tabName) {
+					<#if x['graph_type'] =='pie'>
+					var piearr = [];
+					$.map(data, function(n) {
+						piearr.push([n["${main['categories']}"],n["${x['field_name']}"] * 1 || 0]);
+					});
+					series.push({type: "${x['graph_type']}", name: "${x['graph_name']}", data:piearr });
+					<#else>
+					<#assign pietooltip="0">
 					series.push({type: "${x['graph_type']}", name: "${x['graph_name']}", data: $.map(data, function(n) {
 						return n["${x['field_name']}"] * 1 || 0;
 					})});
+					</#if>
 				}
 			}
 		<#else>
-			series.push({type: "${x['graph_type']}", name: "${x['graph_name']}", data: $.map(data, function(n) {
-				return n["${x['field_name']}"] * 1 || 0;
-			})});
+		<#if x['graph_type'] =='pie'>
+		var piearr = [];
+		$.map(data, function(n) {
+			piearr.push([n["${main['categories']}"],n["${x['field_name']}"] * 1 || 0]);
+		});
+		series.push({type: "${x['graph_type']}", name: "${x['graph_name']}", data:piearr });
+		<#else>
+		<#assign pietooltip="0">
+		series.push({type: "${x['graph_type']}", name: "${x['graph_name']}", data: $.map(data, function(n) {
+			return n["${x['field_name']}"] * 1 || 0;
+		})});
+		</#if>
 		</#if>
 		
 	</#list>
 	 
 	var options = reportUtil.getSplineOptions(categories, series, "${main['ytext']}");
 	//options.tooltip.headerFormat = '<span style="font-size: 10px">{point.key}人</span><br/>';
+	<#if pietooltip =="1">
+	options.tooltip = {pointFormat: '{point.y}, <b>{point.percentage:.1f}%</b>' };
+	</#if>
+	<#-- update-end-author:taoyan date:20181109 for：online图表配置 饼图无文字提示 全部显示slice  -->
 	//执行扩展js
 	if(typeof(xFixedOptions) == 'function') {
 		xFixedOptions(options, tabName);

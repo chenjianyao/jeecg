@@ -105,6 +105,14 @@ $(function () {
         }
     });
 
+    function hiddenloading(){
+		$("#panelloadingDiv").hide();
+	}
+    
+    function showloading(){
+		$("#panelloadingDiv").show();
+	}
+
     function menuItem() {
         // 获取标识数据
         var dataUrl = $(this).attr('href'),
@@ -134,11 +142,30 @@ $(function () {
 
         // 选项卡菜单不存在
         if (flag) {
+
+        	if($(".J_iframe").length>10){
+        		layer.open({
+        			   title: ['提示信息', 'font-size:16px;']
+        			  ,type: 1
+        			  ,content: '<div style="padding: 20px 1px 20px 60px;border-bottom:1px solid #ddd"><i style="position: absolute;top: 16px;left: 15px; width: 30px;height: 30px;" class="layui-layer-ico layui-layer-ico0"></i>请先关闭一些选项卡(最多允许打开10个)！</div>'
+        			  ,btn: '确 定'
+        			  ,icon:1
+        			  ,btnAlign: 'c'
+        			  ,area: ['330px', '160px']
+        			  ,yes: function(index){
+        				  layer.close(index); 
+        			  }
+        			});
+        		return false;
+        	}
+
             var str = '<a href="javascript:;" class="active J_menuTab" data-id="' + dataUrl + '">' + menuName + ' <i class="fa fa-times-circle"></i><!--&nbsp;<i class="fa fa-refresh"></i>--></a>';
             $('.J_menuTab').removeClass('active');
 
             // 添加选项卡对应的iframe
-            var str1 = '<iframe class="J_iframe" name="iframe' + dataIndex + '" width="100%" height="100%" src="' + dataUrl + '" frameborder="0" data-id="' + dataUrl + '" seamless></iframe>';
+
+            var str1 = '<iframe class="J_iframe" onreadystatechange="hiddenloading();" onload="hiddenloading();" name="iframe' + dataIndex + '" width="100%" height="100%" src="' + dataUrl + '" frameborder="0" data-id="' + dataUrl + '" seamless></iframe>';
+
             $('.J_mainContent').find('iframe.J_iframe').hide().parents('.J_mainContent').append(str1);
 
             //显示loading提示
@@ -150,6 +177,9 @@ $(function () {
 //            });
             // 添加选项卡
             $('.J_menuTabs .page-tabs-content').append(str);
+
+            showloading();
+
             scrollToTab($('.J_menuTab.active'));
         }
         //var last = $("a[data-id='"+dataUrl+"']");
@@ -184,6 +214,8 @@ $(function () {
     function closeTab() {
         var closeTabId = $(this).parents('.J_menuTab').data('id');
         var currentWidth = $(this).parents('.J_menuTab').width();
+
+        hiddenloading();
 
         // 当前元素处于活动状态
         if ($(this).parents('.J_menuTab').hasClass('active')) {
@@ -271,6 +303,9 @@ $(function () {
             $(this).remove();
         });
         $('.page-tabs-content').css("margin-left", "0");
+
+        hiddenloading();
+
     }
     $('.J_tabCloseOther').on('click', closeOtherTabs);
 
